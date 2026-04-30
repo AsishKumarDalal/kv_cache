@@ -75,7 +75,16 @@ class SLM(nn.Module):
         self.out_head=nn.Linear(cfg.d_model,cfg.vocab)
 
     def forward(self,x):
+        B, T = x.shape
         v_embed=self.val_embed(x)
+        pos = torch.arange(0, T, device=x.device)
+        pos_embed=self.pos_embed(pos)
+        x=v_embed+pos_embed
+        for layer in self.tflayers:
+            x=layer(x)
+        x=self.fnorm(x)
+        return self.out_head(x)
+    
 
 
 
